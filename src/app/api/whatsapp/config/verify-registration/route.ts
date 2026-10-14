@@ -140,6 +140,16 @@ export async function GET() {
     )
   }
 
+  if (checks.phone_metadata_ok && checks.waba_subscribed_to_app && !config.registered_at) {
+    const now = new Date().toISOString()
+    await supabase
+      .from('whatsapp_config')
+      .update({ registered_at: now })
+      .eq('id', config.id)
+    checks.locally_marked_registered = true
+    config.registered_at = now
+  }
+
   const live =
     checks.phone_metadata_ok &&
     (checks.waba_subscribed_to_app ?? false) &&

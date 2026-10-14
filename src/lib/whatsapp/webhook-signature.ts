@@ -56,6 +56,18 @@ export function verifyMetaWebhookSignature(
   signatureHeader: string | null,
 ): boolean {
   const secrets = parseAppSecrets(process.env.META_APP_SECRET)
+
+  // In development, if secret is unset or placeholder, allow webhook so local testing works
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    (secrets.length === 0 || secrets.includes('your-meta-app-secret'))
+  ) {
+    console.warn(
+      '[webhook] Dev mode: allowing webhook with default/placeholder META_APP_SECRET.',
+    )
+    return true
+  }
+
   if (secrets.length === 0) {
     console.error(
       '[webhook] META_APP_SECRET is not set — rejecting request. ' +
